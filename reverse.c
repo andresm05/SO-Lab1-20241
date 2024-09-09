@@ -1,3 +1,5 @@
+//Authors: Jaime Andrés Muñoz and Estefania Goez Moreno
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,15 +7,17 @@
 
 #define MAX_LINE_LENGTH 1024
 
+
 void printErrorMessage(const char *message) {
     fprintf(stderr, "%s\n", message);
 }
+
 
 void printErrorMessages(const char *message, const char *filename) {
     fprintf(stderr, "reverse: %s '%s'\n", message, filename);
 }
 
-// Esta función invierte el orden de un arreglo de cadenas
+//This function reverse the order of the lines in the array
 void reverseLines(char **lines, int numLines) {
     int start = 0;
     int end = numLines - 1;
@@ -32,19 +36,19 @@ int main(int argc, char *argv[]) {
     FILE *inputFile;
     FILE *outputFile;
 
-    // Verificar el número de argumentos
+    // Check the number of arguments
     if (argc > 3) {
         printErrorMessage("usage: reverse <input> <output>");
         exit(1);
     }
 
-    // Manejar los casos de argumentos
+    // Managed the input and output files
     if (argc == 1) {
-        // No se especificaron argumentos, leer desde stdin
+        // Doesn't specify any argument, read from stdin and write to stdout
         inputFile = stdin;
         outputFile = stdout;
     } else if (argc == 2) {
-        // Se especificó solo un argumento, leer desde el archivo de entrada y escribir en stdout
+        // Just one argument is specified, read from the input file and write to stdout
         inputFile = fopen(argv[1], "r");
         if (inputFile == NULL) {
             printErrorMessages("cannot open file", argv[1]);
@@ -52,7 +56,7 @@ int main(int argc, char *argv[]) {
         }
         outputFile = stdout;
     } else {
-        // Se especificaron dos argumentos, leer desde el archivo de entrada y escribir en el archivo de salida
+        // Two arguments are specified, read from the input file and write to the output file
         struct stat input_stat, output_stat;
         if (stat(argv[1], &input_stat) == 0 && stat(argv[2], &output_stat) == 0){
              if (input_stat.st_ino == output_stat.st_ino){
@@ -61,7 +65,7 @@ int main(int argc, char *argv[]) {
              }
         }
         
-        
+        // Open the input and output files
         inputFile = fopen(argv[1], "r");
         if (inputFile == NULL) {
             printErrorMessages("cannot open file", argv[1]);
@@ -73,23 +77,23 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
 
-        // Verificar si el archivo de entrada y salida son el mismo
+        // Make sure that output file is different from input file
         if (strcmp(argv[1], argv[2]) == 0) {
             printErrorMessage("reverse: input and output file must differ");
             exit(1);
         }
     }
 
-    // Almacenar las líneas en un arreglo dinámico
+    // Save the lines in an array
     char **lines = NULL;
     int numLines = 0;
     char line[MAX_LINE_LENGTH];
 
     while (fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) {
-        // Eliminar el salto de línea del final de la línea
+        // Delete the newline character
         line[strcspn(line, "\n")] = '\0';
 
-        // Añadir la línea al arreglo dinámico
+        // Add line to the array
         lines = realloc(lines, (numLines + 1) * sizeof(char *));
         if (lines == NULL) {
             printErrorMessage("malloc failed");
@@ -103,17 +107,17 @@ int main(int argc, char *argv[]) {
         numLines++;
     }
 
-    // Invertir el orden de las líneas
+    // Reverse the order of the lines
     reverseLines(lines, numLines);
 
-    // Imprimir las líneas en orden inverso
+    // Print the lines in the output file
     for (int i = 0; i < numLines; i++) {
         fprintf(outputFile, "%s\n", lines[i]);
         free(lines[i]);
     }
     free(lines);
 
-    // Cerrar archivos si no son stdin/stdout
+    // Close lines if they're not stdin/stdout
     if (inputFile != stdin) fclose(inputFile);
     if (outputFile != stdout) fclose(outputFile);
 
